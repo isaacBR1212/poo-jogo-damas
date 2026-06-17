@@ -10,13 +10,8 @@ from kivy.graphics import Color, Ellipse, Rectangle
 from kivy.uix.widget import Widget
 
 
-#  Cores do tabuleiro 
-COR_CASA_CLARA  = (0.94, 0.85, 0.71, 1)   
-COR_CASA_ESCURA = (0.55, 0.37, 0.24, 1)   
 COR_SELECIONADA = (0.20, 0.75, 0.45, 1)   
 COR_DESTINO     = (0.95, 0.80, 0.20, 0.7) 
-COR_PECA_J1     = (0.95, 0.95, 0.90, 1)   
-COR_PECA_J2     = (0.15, 0.12, 0.10, 1)  
 
 
 class CasaWidget(Widget):
@@ -37,57 +32,57 @@ class CasaWidget(Widget):
         t = self.board_screen
 
         eh_escura = (self.linha + self.col) % 2 == 1
+        tema = self.controller.tema   
 
-        # Cor de fundo da casa
+      
         if (self.linha, self.col) == t.selecionado:
             cor_fundo = COR_SELECIONADA
         elif (self.linha, self.col) in t.destinos_possiveis:
             cor_fundo = COR_DESTINO
         elif eh_escura:
-            cor_fundo = COR_CASA_ESCURA
+            cor_fundo = tema.casa_escura
         else:
-            cor_fundo = COR_CASA_CLARA
+            cor_fundo = tema.casa_clara
 
         with self.canvas:
             Color(*cor_fundo)
             Rectangle(pos=self.pos, size=self.size)
 
-            # Desenha a peça se houver
+           
             peca = self.controller.get_tabuleiro()[self.linha][self.col]
             if peca:
                 margem = w * 0.12
                 diametro = w - 2 * margem
 
-                
+               
                 Color(0, 0, 0, 0.25)
                 Ellipse(
                     pos=(x + margem + 2, y + margem - 2),
                     size=(diametro, diametro)
                 )
 
-                # Corpo da peça
                 if peca.jogador == 1:
-                    Color(*COR_PECA_J1)
+                    Color(*tema.peca_j1)
                 else:
-                    Color(*COR_PECA_J2)
+                    Color(*tema.peca_j2)
                 Ellipse(
                     pos=(x + margem, y + margem),
                     size=(diametro, diametro)
                 )
 
-                # Anel da dama
+              
                 from app.models.damas import PecaDamas
                 if isinstance(peca, PecaDamas) and peca.dama:
-                    Color(0.85, 0.65, 0.10, 1)   # dourado
+                    Color(*tema.dama_anel)
                     espessura = diametro * 0.12
                     Ellipse(
                         pos=(x + margem + espessura, y + margem + espessura),
                         size=(diametro - 2*espessura, diametro - 2*espessura)
                     )
                     if peca.jogador == 1:
-                        Color(*COR_PECA_J1)
+                        Color(*tema.peca_j1)
                     else:
-                        Color(*COR_PECA_J2)
+                        Color(*tema.peca_j2)
                     Ellipse(
                         pos=(x + margem + espessura*2, y + margem + espessura*2),
                         size=(diametro - 4*espessura, diametro - 4*espessura)
@@ -101,16 +96,17 @@ class CasaWidget(Widget):
 
 
 class BoardScreen(MDScreen):
-    """Tela principal do jogo ."""
+    """Tela principal do jogo com tabuleiro """
 
     def __init__(self, controller, **kwargs):
         self.controller = controller
-        self.selecionado = None        
+        self.selecionado = None        # (linha, col) da peça selecionada
         self.destinos_possiveis = []   
         self._dialog = None
         super().__init__(**kwargs)
         self._build()
 
+    # Construção da interface 
 
     def _build(self):
         raiz = MDBoxLayout(orientation="vertical")
@@ -119,11 +115,13 @@ class BoardScreen(MDScreen):
         barra = MDTopAppBar(
             title="Jogo de Damas",
             left_action_items=[["arrow-left", lambda x: self._voltar_menu()]],
-            right_action_items=[["refresh", lambda x: self._reiniciar()]],
+            right_action_items=[
+                ["palette", lambda x: self._abrir_temas()],
+                ["refresh", lambda x: self._reiniciar()],
+            ],
         )
         raiz.add_widget(barra)
 
-       
         centro = MDBoxLayout(orientation="horizontal")
 
         self.painel = self._criar_painel()
@@ -144,6 +142,7 @@ class BoardScreen(MDScreen):
         raiz.add_widget(centro)
         self.add_widget(raiz)
 
+        # Registra callback no controller
         self.controller.on_update = self.atualizar
 
     def _criar_painel(self):
@@ -197,12 +196,10 @@ class BoardScreen(MDScreen):
         )
         painel.add_widget(self.label_j2)
 
-        
         painel.add_widget(MDBoxLayout())
 
         return painel
 
-    #  condições: 
 
     def tratar_toque(self, linha: int, col: int):
         if self.controller.get_fim():
@@ -212,14 +209,12 @@ class BoardScreen(MDScreen):
         peca_clicada = tabuleiro[linha][col]
         jogador_atual = self.controller.get_numero_jogador_atual()
 
-       
         if peca_clicada and peca_clicada.jogador == jogador_atual:
             self.selecionado = (linha, col)
             self.destinos_possiveis = self.controller.get_jogadas_possiveis(linha, col)
             self.redesenhar()
             return
 
-        
         if self.selecionado and (linha, col) in self.destinos_possiveis:
             ol, oc = self.selecionado
             self.selecionado = None
@@ -227,15 +222,12 @@ class BoardScreen(MDScreen):
             self.controller.executar_jogada(ol, oc, linha, col)
             return
 
-        
         self.selecionado = None
         self.destinos_possiveis = []
         self.redesenhar()
 
-   
 
     def atualizar(self):
-        """Chamado pelo controller após cada jogada válida."""
         self.label_turno.text = self.controller.get_jogador_atual()
         self.label_j1.text = str(self.controller.get_pecas_count(1))
         self.label_j2.text = str(self.controller.get_pecas_count(2))
@@ -249,7 +241,6 @@ class BoardScreen(MDScreen):
             for c in range(8):
                 self.casas[l][c]._desenhar()
 
-    #  resultado final
 
     def _mostrar_resultado(self):
         vencedor = self.controller.get_vencedor()
@@ -276,6 +267,7 @@ class BoardScreen(MDScreen):
         )
         self._dialog.open()
 
+    #  Ações
 
     def _reiniciar(self):
         self.selecionado = None
@@ -286,3 +278,6 @@ class BoardScreen(MDScreen):
         self.selecionado = None
         self.destinos_possiveis = []
         self.manager.current = "menu"
+
+    def _abrir_temas(self):
+        self.manager.current = "theme"

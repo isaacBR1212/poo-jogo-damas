@@ -1,15 +1,17 @@
 from app.models.jogada import Jogada, Jogador
 from app.models.damas import Damas
+from app.models.tema import Tema, TEMA_CLASSICO
 
 
 class GameController:
     """Faz a ponte entre a interface gráfica e a lógica do jogo."""
 
     def __init__(self):
-        self.game = None          
+        self.game = None          # objeto Damas (criado em iniciar_partida)
         self.on_update = None     
+        self.tema = TEMA_CLASSICO  # tema visual atual (cores do tabuleiro/peças)
 
-    #  Iniciar 
+    # Iniciar 
 
     def iniciar_partida(self, nome1: str, nome2: str) -> None:
         j1 = Jogador(1, nome1 or "Jogador 1")
@@ -18,7 +20,7 @@ class GameController:
         self.game.iniciar()
         self._notificar()
 
-    #  Ações do jogo 
+    # Ações do jogo 
 
     def executar_jogada(self, ol: int, oc: int, dl: int, dc: int) -> bool:
         if not self.game:
@@ -33,8 +35,13 @@ class GameController:
             self.game.iniciar()
             self._notificar()
 
+    def definir_tema(self, tema: Tema) -> None:
+        self.tema = tema
+        self._notificar()
+
 
     def get_tabuleiro(self) -> list[list]:
+        """Retorna matriz 8x8 com símbolo de cada peça ou None."""
         if not self.game:
             return [[None] * 8 for _ in range(8)]
         return [
@@ -53,11 +60,10 @@ class GameController:
         return self.game.jogador_atual.numero
 
     def get_fim(self) -> bool:
-       
+        """True se o jogo terminou."""
         return self.game.fim if self.game else False
 
     def get_vencedor(self) -> str | None:
-        
         if not self.game or not self.game.vencedor:
             return None
         return self.game.vencedor.nome

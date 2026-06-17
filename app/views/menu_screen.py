@@ -1,5 +1,6 @@
 from kivymd.uix.screen import MDScreen
 from kivymd.uix.boxlayout import MDBoxLayout
+from kivymd.uix.floatlayout import MDFloatLayout
 from kivymd.uix.label import MDLabel
 from kivymd.uix.button import MDRaisedButton
 from kivy.metrics import dp
@@ -22,7 +23,7 @@ class PecasDecorativas(Widget):
         r = dp(32)
 
         with self.canvas:
-            # Peça branca
+            # Peça branca 
             Color(0, 0, 0, 0.12)
             Ellipse(pos=(cx - r + dp(15), cy - r + dp(8)), size=(r*2, r*2))
             Color(0.96, 0.96, 0.96, 1)
@@ -40,7 +41,6 @@ class PecasDecorativas(Widget):
 
 
 class BotaoEscuro(Widget):
-    
 
     def __init__(self, text, on_press_cb, **kwargs):
         super().__init__(**kwargs)
@@ -60,7 +60,6 @@ class BotaoEscuro(Widget):
                 radius=[dp(26)]
             )
 
-       
         self.canvas.after.clear()
         from kivy.core.text import Label as CoreLabel
         lbl = CoreLabel(text=self._text, font_size=dp(15), bold=True)
@@ -86,7 +85,6 @@ class BotaoEscuro(Widget):
 
 
 class MenuScreen(MDScreen):
-    """Tela inicial"""
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -112,8 +110,8 @@ class MenuScreen(MDScreen):
             height=dp(110),
         ))
 
-        # Peças 
-        container = MDBoxLayout(size_hint_y=None, height=dp(110))
+        # Peças decorativas
+        container = MDFloatLayout(size_hint_y=None, height=dp(110))
         pecas = PecasDecorativas(pos_hint={"center_x": 0.5, "center_y": 0.5})
         container.add_widget(pecas)
         raiz.add_widget(container)
@@ -122,20 +120,18 @@ class MenuScreen(MDScreen):
 
         # Botões
         def add_btn(texto, cb):
-            box = MDBoxLayout(size_hint_y=None, height=dp(52))
+            box = MDFloatLayout(size_hint_y=None, height=dp(52))
             btn = BotaoEscuro(
                 text=texto,
                 on_press_cb=cb,
                 pos_hint={"center_x": 0.5, "center_y": 0.5},
             )
-            box.add_widget(Widget())
             box.add_widget(btn)
-            box.add_widget(Widget())
             raiz.add_widget(box)
             raiz.add_widget(Widget(size_hint_y=None, height=dp(14)))
 
         add_btn("NOVO JOGO",      lambda: setattr(self.manager, "current", "config"))
-        add_btn("CONFIGURAÇÕES",  lambda: setattr(self.manager, "current", "config"))
+        add_btn("CONFIGURAÇÕES",  lambda: setattr(self.manager, "current", "theme"))
         add_btn("SAIR",           lambda: __import__(
             "kivy.app", fromlist=["App"]).App.get_running_app().stop())
 

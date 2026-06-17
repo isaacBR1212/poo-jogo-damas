@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
-from src.core.tabuleiro import Tabuleiro
-from src.core.jogada import Jogada, Jogador
+from app.models.tabuleiro import Tabuleiro
+from app.models.jogada import Jogada, Jogador
 
 
 class JogoTabuleiro(ABC):
     def __init__(self, jogador1: Jogador, jogador2: Jogador):
-        self._jogadores = [jogador1, jogador2]
+        self._jogadores = [jogador1, jogador2]   #Agregação
         self._turno_atual = 0  
-        self._tabuleiro: Tabuleiro = self._criar_tabuleiro()
+        self._tabuleiro: Tabuleiro = self._criar_tabuleiro() #tabuleiroc criado
         self._fim = False
         self._vencedor: Jogador | None = None
 
@@ -55,7 +55,6 @@ class JogoTabuleiro(ABC):
         self._turno_atual = 1 - self._turno_atual
 
     def executar_turno(self, jogada: Jogada) -> bool:
-        """Valida, aplica e avança o turno. """
         if self._fim:
             print("O jogo já terminou.")
             return False

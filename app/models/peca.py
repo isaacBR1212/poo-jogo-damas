@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 
 
-class Peca(ABC):
+class Peca(ABC):       # Classe pai
     def __init__(self, jogador: int):
         self._jogador = jogador  # 1 ou 2
 

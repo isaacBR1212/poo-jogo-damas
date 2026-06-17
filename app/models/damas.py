@@ -1,12 +1,11 @@
-from src.core.peca import Peca
-from src.core.tabuleiro import Tabuleiro
-from src.core.jogada import Jogada, Jogador
-from src.core.jogo_tabuleiro import JogoTabuleiro
+from app.models.peca import Peca
+from app.models.tabuleiro import Tabuleiro
+from app.models.jogada import Jogada, Jogador
+from app.models.jogo_tabuleiro import JogoTabuleiro
 
-
-class PecaDamas(Peca):
+class PecaDamas(Peca):  #classe filho de peça
     def __init__(self, jogador: int, dama: bool = False):
-        super().__init__(jogador)
+        super().__init__(jogador)  # chama Peca.__init__
         self._dama = dama
 
     @property
@@ -14,7 +13,7 @@ class PecaDamas(Peca):
         return self._dama
 
     def promover(self) -> None:
-        self._dama = True
+        self._dama = True  # método de muda de estado
 
     def simbolo(self) -> str:
         if self._jogador == 1:
@@ -28,13 +27,19 @@ class Damas(JogoTabuleiro):
 
     def inicializar_tabuleiro(self) -> None:
         self._tabuleiro.limpar()
+
+        # Player 2
         for linha in range(3):
             for col in range(8):
-                if (linha + col) % 2 == 1:
+                if (linha + col) % 2 == 1:   # condição casa escura
+                    
                     self._tabuleiro.colocar(linha, col, PecaDamas(2))
+
+        # Player 1
         for linha in range(5, 8):
             for col in range(8):
-                if (linha + col) % 2 == 1:
+                if (linha + col) % 2 == 1:   # condição casa escura
+
                     self._tabuleiro.colocar(linha, col, PecaDamas(1))
 
     def _pecas_do_jogador(self, numero: int) -> list[tuple[int, int]]:
@@ -140,7 +145,8 @@ class Damas(JogoTabuleiro):
     def verificar_fim_de_jogo(self) -> None:
         for numero in [1, 2]:
             pecas = self._pecas_do_jogador(numero)
-            if not pecas:
+            if not pecas:               # lista vazia?
+
                 self._fim = True
                 outro = 1 if numero == 2 else 2
                 self._vencedor = self._jogadores[outro - 1]

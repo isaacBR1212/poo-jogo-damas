@@ -1,5 +1,5 @@
 from typing import Optional
-from src.core.peca import Peca
+from app.models.peca import Peca
 
 
 class Tabuleiro:

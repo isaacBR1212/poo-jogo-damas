@@ -6,7 +6,7 @@ class GameController:
     """Faz a ponte entre a interface gráfica e a lógica do jogo."""
 
     def __init__(self):
-        self.game = None         
+        self.game = None          
         self.on_update = None     
 
     #  Iniciar 
@@ -18,7 +18,7 @@ class GameController:
         self.game.iniciar()
         self._notificar()
 
-    # Ações do jogo 
+    #  Ações do jogo 
 
     def executar_jogada(self, ol: int, oc: int, dl: int, dc: int) -> bool:
         if not self.game:
